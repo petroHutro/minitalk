@@ -6,7 +6,7 @@
 /*   By: coleta <coleta@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/03 18:45:30 by coleta            #+#    #+#             */
-/*   Updated: 2022/06/04 20:10:30 by coleta           ###   ########.fr       */
+/*   Updated: 2022/06/06 20:53:37 by coleta           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,17 @@
 
 static volatile sig_atomic_t	g_signal;
 
-// static void	ft_signals(int signal)
-// {
-// 	(void) signal;
-// 	g_signal = 0;
-// }
+int	wait_sig(int wait)
+{
+	while (g_signal == 1)
+	{
+		if (wait > 9999)
+			putstr_error("Waiting too long\n");
+		usleep(5);
+		wait += 5;
+	}
+	return (wait);
+}
 
 void	send_message(int pid, char *str)
 {
@@ -38,13 +44,7 @@ void	send_message(int pid, char *str)
 				kills(pid, SIGUSR2);
 			else
 				kills(pid, SIGUSR1);
-			while (g_signal == 1)
-			{
-				if (wait > 9999)
-					putstr_error("Waiting too long\n");
-				usleep(5);
-				wait += 5;
-			}
+			wait = wait_sig(wait);
 		}
 		++ str;
 	}
@@ -63,20 +63,21 @@ static int	signal_init(struct sigaction *sig)
 {
 	sigset_t	block;
 
-	if (sigemptyset(&block) < 0 || sigaddset(&block, SIGUSR1) < 0 || sigaddset(&block, SIGUSR2) < 0)
+	if (sigemptyset(&block) < 0 || sigaddset(&block, SIGUSR1) < 0 || \
+	sigaddset(&block, SIGUSR2) < 0)
 		putstr_error("Mask error\n");
-	// ft_memset(sig, 0, sizeof(struct sigaction));
 	sig->sa_mask = block;
 	sig->sa_flags = SA_SIGINFO;
 	sig->sa_sigaction = ft_signals;
-	if ((sigaction(SIGUSR1, sig, NULL) < 0) || (sigaction (SIGUSR2, sig, NULL) < 0))
+	if ((sigaction(SIGUSR1, sig, NULL) < 0) || \
+	(sigaction (SIGUSR2, sig, NULL) < 0))
 		putstr_error("Signnal error\n");
 	return (1);
 }
 
 int	main(int argc, char **argv)
 {
-	int	pid;
+	int					pid;
 	struct sigaction	sig;
 
 	if (argc == 3)
@@ -86,7 +87,6 @@ int	main(int argc, char **argv)
 		{
 			if (signal_init(&sig))
 				send_message(pid, argv[2]);
-			// signal(SIGUSR2, ft_signals); 
 		}
 		else
 			putstr_error("PID error\n");

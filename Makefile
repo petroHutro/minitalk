@@ -2,7 +2,8 @@ SERVER						= server
 CLIENT						= client
 NAME						= minitalk
 
-SRC_UTILS					= utils.c
+SRC_UTILS					= utils.c \
+							utils_str.c
 SRC_CLIENT					= client.c
 SRC_SERVER					= server.c
 HEADER						= minitalk.h
