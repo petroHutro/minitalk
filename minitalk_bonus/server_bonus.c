@@ -1,18 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: coleta <coleta@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/03 18:45:21 by coleta            #+#    #+#             */
-/*   Updated: 2022/06/06 21:03:58 by coleta           ###   ########.fr       */
+/*   Updated: 2022/06/07 17:05:03 by coleta           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "minitalk_bonus.h"
 
-char	*add_char(char	*str, char c)
+static void	print_message(t_message *message)
+{
+	ft_putchar_fd('\n', 1);
+	ft_putstr_fd(message->text, 1);
+	free_message(message);
+	kills(message->pid, SIGUSR1);
+}
+
+static char	*add_char(char	*str, char c)
 {
 	char	*copy;
 	size_t	len;
@@ -22,7 +30,11 @@ char	*add_char(char	*str, char c)
 	len = ft_strlen(str);
 	copy = (char *)malloc(len + 2);
 	if (copy == (void *)0)
-		return ((void *)0);
+	{
+		if (str)
+			free(str);
+		putstr_error("Malloc error\n");
+	}
 	while (++i < len)
 		copy[i] = str[i];
 	copy[i] = c;
@@ -32,7 +44,7 @@ char	*add_char(char	*str, char c)
 	return (copy);
 }
 
-static void	get_massage(int signal, siginfo_t *sigingo, void *context)
+static void	get_message(int signal, siginfo_t *sigingo, void *context)
 {
 	static t_message	message;
 
@@ -47,13 +59,10 @@ static void	get_massage(int signal, siginfo_t *sigingo, void *context)
 		message.i = 0;
 		if (!message.c)
 		{
-			ft_putchar_fd('\n', 1);
-			ft_putstr_fd(message.text, 1);
-			free_message(&message);
-			kills(message.pid, SIGUSR1);
+			print_message(&message);
 			return ;
 		}
-		message.text = add_char(message.text, message.c);//обработать ошибки 
+		message.text = add_char(message.text, message.c);
 		message.c = 0;
 	}
 	else
@@ -70,7 +79,7 @@ static int	signal_init(struct sigaction *sig)
 		putstr_error("Mask error\n");
 	sig->sa_mask = block;
 	sig->sa_flags = SA_SIGINFO;
-	sig->sa_sigaction = get_massage;
+	sig->sa_sigaction = get_message;
 	if ((sigaction(SIGUSR1, sig, NULL) < 0) || \
 	(sigaction (SIGUSR2, sig, NULL) < 0))
 		putstr_error("Signnal error\n");

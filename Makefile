@@ -1,41 +1,54 @@
-SERVER						= server
-CLIENT						= client
-NAME						= minitalk
+NAME = 		minitalk
 
-SRC_UTILS					= utils.c \
-							utils_str.c
-SRC_CLIENT					= client.c
-SRC_SERVER					= server.c
-HEADER						= minitalk.h
+SRCS = 		minitalk/utils.c \
+			minitalk/utils_str.c
+CLINET = 	minitalk/client.c
+SERVER = 	minitalk/server.c
+HEADER = 	minitalk/minitalk.h
 
-OBJS_CLIENT					=$(patsubst %.c, %.o, $(SRC_CLIENT))
-OBJS_SERVER					=$(patsubst %.c, %.o, $(SRC_SERVER))
-OBJS_UTILS					=$(patsubst %.c, %.o, $(SRC_UTILS))
+SRCS_BONUS = 	minitalk_bonus/utils_bonus.c \
+				minitalk_bonus/utils_str_bonus.c
+CLINET_BONUS = 	minitalk_bonus/client_bonus.c
+SERVER_BONUS = 	minitalk_bonus/server_bonus.c
+HEADER_BONUS = 	minitalk_bonus/minitalk_bonus.h
 
-CC							= gcc
-CFLAGS						= -O2 -Wall -Wextra -Werror
-RM							= rm -f
+OBJS = ${patsubst %.c, %.o, ${SRCS}}
+CLINET_OBJ = ${patsubst %.c, %.o, ${CLINET}}
+SERVER_OBJ = ${patsubst %.c, %.o, ${SERVER}}
 
-.PHONY:						all clean fclean re
+OBJS_BONUS = ${patsubst %.c, %.o, ${SRCS_BONUS}}
+CLINET_OBJ_BONUS = ${patsubst %.c, %.o, ${CLINET_BONUS}}
+SERVER_OBJ_BONUS = ${patsubst %.c, %.o, ${SERVER_BONUS}}
 
-%.o:						%.c $(HEADER)
-								$(CC) $(CFLAGS) -c $< -o $@
+FLAGS = -Wall -Wextra -Werror
 
-all:						$(NAME)
+all: ${NAME}
 
-$(NAME): 					$(CLIENT) $(SERVER)
-						
-$(CLIENT):					$(OBJS_CLIENT) $(OBJS_UTILS)
-								$(CC) -o $(CLIENT) $(OBJS_CLIENT) $(OBJS_UTILS)
+${NAME}: client server
 
-$(SERVER):					$(OBJS_SERVER) $(OBJS_UTILS)
-								$(CC) -o $(SERVER) $(OBJS_SERVER) $(OBJS_UTILS)
+bonus: client_bonus server_bonus
+
+client: ${CLINET_OBJ} ${OBJS}
+	gcc ${CLINET_OBJ} ${OBJS} -o $@ -I ${HEADER}
+
+server: ${SERVER_OBJ} ${OBJS}
+	gcc ${SERVER_OBJ} ${OBJS} -o $@ -I ${HEADER}
+
+client_bonus: ${CLINET_OBJ_BONUS} ${OBJS_BONUS}
+	gcc ${CLINET_OBJ_BONUS} ${OBJS_BONUS} -o $@ -I ${HEADER_BONUS}
+
+server_bonus: ${SERVER_OBJ_BONUS} ${OBJS_BONUS}
+	gcc ${SERVER_OBJ_BONUS} ${OBJS_BONUS} -o $@ -I ${HEADER_BONUS}
+
+%.o: %.c ${HEADER}
+	gcc ${FLAGS} -c $< -o $@
 
 clean:
-								$(RM) $(OBJS_CLIENT) $(OBJS_SERVER) $(OBJS_UTILS) \
-								$(OBJS_CLIENT_BONUS) $(OBJS_SERVER_BONUS) $(OBJS_UTILS_BONUS)
-				
-fclean:						clean
-								$(RM) $(SERVER) $(CLIENT)
+	rm -f minitalk_bonus/*.o minitalk_bonus/*.g.gch minitalk/*.o minitalk/*.g.gch
 
-re:							fclean all
+fclean: clean
+	rm -f client server client_bonus server_bonus
+
+re: fclean all
+
+.PHONY: all clean fclean re bonus

@@ -6,14 +6,13 @@
 /*   By: coleta <coleta@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/03 18:45:25 by coleta            #+#    #+#             */
-/*   Updated: 2022/06/06 20:49:27 by coleta           ###   ########.fr       */
+/*   Updated: 2022/06/07 15:44:35 by coleta           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_H
 # define MINITALK_H
 
-# include <stdio.h>
 # include <signal.h>
 # include <unistd.h>
 # include <stdlib.h>
